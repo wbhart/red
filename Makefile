@@ -1,12 +1,15 @@
 INC=-I/home/wbhart/gc/include
 LIB=-L/home/wbhart/gc/lib
-OBJS=backend.o types.o symbol.o environment.o
-HEADERS=backend.h types.h symbol.h environment.h
+OBJS=parser.o backend.o types.o symbol.o environment.o
+HEADERS=parser.h backend.h types.h symbol.h environment.h
 CC=g++
 RED_FLAGS=-O2 -g -std=c++11
 
 red: red.c $(HEADERS) $(OBJS)
 	$(CC) $(RED_FLAGS) red.c -o red $(INC) $(OBJS) $(LIB) -lgc
+
+parser.o: parser.c $(HEADERS)
+	$(CC) $(RED_FLAGS) -c parser.c -o parser.o $(INC)
 
 backend.o: backend.c $(HEADERS)
 	$(CC) $(RED_FLAGS) -c backend.c -o backend.o $(INC)

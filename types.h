@@ -69,18 +69,22 @@ typedef struct
 
 typedef std::function<gen_t * ()> fn_t;
 
+typedef std::function<fn_t ()> del_t;
+
 typedef struct function_t
 {
    sym_t ** params;
    gen_t ** vals;
    struct env_t * scope;
-   jmp_buf exc;
+   jmp_buf * exc;
    fn_t fn;
+   const fn_t * arr;
 } function_t;
 
 typedef struct block_t
 {
    struct env_t * scope;
+   const fn_t * arr;
 } block_t;
 
 extern type_t * t_nil;

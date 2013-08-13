@@ -7,38 +7,36 @@ int main(void)
    GC_INIT();
    init();
 
-   VAR("i", INT(0))();
-   VAR("s", INT(0))();
-
-   scope_up();
+   _var("i", _int(0))()();
+   _var("s", _int(0))()();
    
-   fn_t arr[] = { INC(IDENT("i")), ADDEQ(IDENT("s"), IDENT("i")) };
+   del_t arr[] = { _inc(_ident("i")), _addeq(_ident("s"), _ident("i")) };
 
-   fn_t block = BLOCK(arr);
+   _while(_lt(_ident("i"), _int(10)), _block(arr))()();
 
-   scope_down();
-   
-   WHILE(LT(IDENT("i"), INT(10000000)), block)();
+   _println(_ident("s"))()();
 
-   PRINTLN(IDENT("s"))();
-
-   scope_up();
-   
    const char * params[] = { "a" };
 
-   NEW_FUNCTION("bill", params);
+   del_t body[] = { _var("k", _ident("a")), _inc(_ident("k")), _return(_ident("k")) };
 
-   fn_t body[] = { VAR("k", IDENT("a")), INC(IDENT("k")), RETURN(IDENT("k")) };
+   _fn("bill", params, body)()();
 
-   FUNCTION_BODY(body)();
+   del_t vals[] = { _int(3) };
 
-   scope_down();
-   
-   fn_t vals[] = { INT(3) };
+   _println(_call("bill", vals))()();
 
-   fn_t root = PRINTLN(CALL("bill", vals));
+   const char * params2[] = { "n" };
 
-   root();
+   del_t vals3[] = { _sub(_ident("n"), _int(1)) };
+
+   del_t body2[] = { _if_else(_le(_ident("n"), _int(1)), _return(_int(1)), _return(_mul(_ident("n"), _call("fac", vals3)))) };
+
+   _fn("fac", params2, body2)()();
+
+   del_t vals2[] = { _int(20) };
+
+   _println(_call("fac", vals2))()();
 
    return 0;
 }

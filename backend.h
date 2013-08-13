@@ -7,6 +7,7 @@
 #include "types.h"
 #include "symbol.h"
 #include "environment.h"
+#include "parser.h"
 
 #ifndef BACKEND_H
 #define BACKEND_H
@@ -25,66 +26,64 @@ extern sym_t ** sym_tab;
 
 void init(void);
 
-fn_t INT(long i);
-fn_t UINT(unsigned long u);
-fn_t DOUBLE(double d);
+del_t _int(long i);
+del_t _uint(unsigned long u);
+del_t _double(double d);
 
-fn_t ADD(fn_t a, fn_t b);
-fn_t SUB(fn_t a, fn_t b);
-fn_t MUL(fn_t a, fn_t b);
-fn_t DIV(fn_t a, fn_t b);
-fn_t MOD(fn_t a, fn_t b);
+del_t _add(del_t a, del_t b);
+del_t _sub(del_t a, del_t b);
+del_t _mul(del_t a, del_t b);
+del_t _div(del_t a, del_t b);
+del_t _mod(del_t a, del_t b);
 
-fn_t ADDEQ(fn_t a, fn_t b);
-fn_t SUBEQ(fn_t a, fn_t b);
-fn_t MULEQ(fn_t a, fn_t b);
-fn_t DIVEQ(fn_t a, fn_t b);
-fn_t MODEQ(fn_t a, fn_t b);
+del_t _addeq(del_t a, del_t b);
+del_t _subeq(del_t a, del_t b);
+del_t _muleq(del_t a, del_t b);
+del_t _diveq(del_t a, del_t b);
+del_t _modeq(del_t a, del_t b);
 
-fn_t LT(fn_t a, fn_t b);
-fn_t GT(fn_t a, fn_t b);
-fn_t LE(fn_t a, fn_t b);
-fn_t GE(fn_t a, fn_t b);
-fn_t EQ(fn_t a, fn_t b);
-fn_t NE(fn_t a, fn_t b);
+del_t _lt(del_t a, del_t b);
+del_t _gt(del_t a, del_t b);
+del_t _le(del_t a, del_t b);
+del_t _ge(del_t a, del_t b);
+del_t _eq(del_t a, del_t b);
+del_t _ne(del_t a, del_t b);
 
-fn_t INC(fn_t a);
-fn_t DEC(fn_t a);
+del_t _inc(del_t a);
+del_t _dec(del_t a);
 
-fn_t PRINT(fn_t f);
+del_t _print(del_t f);
 
-fn_t PRINTLN(fn_t f);
+del_t _println(del_t f);
 
-fn_t IDENT(const char * id);
+del_t _ident(const char * id);
 
-fn_t ASSIGN(fn_t var, fn_t val);
+del_t _assign(del_t var, del_t val);
 
-fn_t VAR(const char * id, fn_t val);
+del_t _var(const char * id, del_t val);
 
-fn_t BLOCK_FN(const fn_t * arr, int num);
+del_t _block_fn(const del_t * arr, int num);
 
-#define BLOCK(xx) \
-      BLOCK_FN(xx, sizeof(xx)/sizeof(fn_t))
+#define _block(xx) \
+      _block_fn(xx, sizeof(xx)/sizeof(del_t))
 
-void NEW_FUNCTION_FN(const char * id, const char ** params, int num_params);
+del_t _function(const char * id, const char ** params, int num_params, 
+                                                         const del_t * arr, int num);
 
-#define NEW_FUNCTION(id, xx) \
-   NEW_FUNCTION_FN(id, xx, sizeof(xx)/sizeof(char *))
+#define _fn(id, params, xx) \
+   _function(id, params, sizeof(params)/sizeof(char *), xx, sizeof(xx)/sizeof(del_t))
 
-fn_t FUNCTION_FN(const fn_t * arr, int num);
+del_t _call_fn(const char * id, const del_t * params, int num);
 
-#define FUNCTION_BODY(xx) \
-   FUNCTION_FN(xx, sizeof(xx)/sizeof(fn_t))
+#define _call(id, params) \
+      _call_fn(id, params, sizeof(params)/sizeof(del_t))
 
-fn_t CALL_FN(const char * id, const fn_t * params, int num);
+del_t _while(del_t cond, del_t stmt);
 
-#define CALL(id, params) \
-      CALL_FN(id, params, sizeof(params)/sizeof(fn_t))
+del_t _if_else(del_t cond, del_t stmt1, del_t stmt2);
 
-fn_t WHILE(fn_t cond, fn_t stmt);
+del_t _return_nil(void);
 
-fn_t RETURN_NIL(void);
-
-fn_t RETURN(fn_t val);
+del_t _return(del_t val);
 
 #endif
