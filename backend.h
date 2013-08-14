@@ -7,10 +7,13 @@
 #include "types.h"
 #include "symbol.h"
 #include "environment.h"
-#include "parser.h"
 
 #ifndef BACKEND_H
 #define BACKEND_H
+
+extern jmp_buf exc;
+
+void exception(void);
 
 typedef struct
 {
@@ -24,7 +27,7 @@ extern jmp_buf exc;
 
 extern sym_t ** sym_tab;
 
-void init(void);
+extern function_t * current_fn;
 
 del_t _int(long i);
 del_t _uint(unsigned long u);
@@ -56,24 +59,24 @@ del_t _print(del_t f);
 
 del_t _println(del_t f);
 
-del_t _ident(const char * id);
+del_t _ident(sym_t * id);
 
 del_t _assign(del_t var, del_t val);
 
-del_t _var(const char * id, del_t val);
+del_t _var(sym_t * id, del_t val);
 
 del_t _block_fn(const del_t * arr, int num);
 
 #define _block(xx) \
       _block_fn(xx, sizeof(xx)/sizeof(del_t))
 
-del_t _function(const char * id, const char ** params, int num_params, 
+del_t _function(sym_t * id, sym_t ** params, int num_params, 
                                                          const del_t * arr, int num);
 
 #define _fn(id, params, xx) \
    _function(id, params, sizeof(params)/sizeof(char *), xx, sizeof(xx)/sizeof(del_t))
 
-del_t _call_fn(const char * id, const del_t * params, int num);
+del_t _call_fn(sym_t * id, const del_t * params, int num);
 
 #define _call(id, params) \
       _call_fn(id, params, sizeof(params)/sizeof(del_t))

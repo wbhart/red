@@ -4,17 +4,20 @@
 #include <ctype.h>
 
 #include "symbol.h"
+#include "environment.h"
+#include "types.h"
+#include "backend.h"
 #include "gc.h"
 
 typedef enum 
 {
-   L_INT, L_DOUBLE, L_STRING, L_CHAR, L_OP, L_IDENT
+   P_INT, P_DOUBLE, P_STRING, P_CHAR, P_OP, P_IDENT
 } lex_t;
 
 typedef struct {
    lex_t tag;
    union {
-      long l;
+      long i;
       double d;
       char c;
       char * str;
@@ -46,7 +49,47 @@ extern parse_t * op_lparem;
 extern parse_t * op_rparen;
 extern parse_t * op_comma;
 
+void init(void);
+
 void parse_init(void);
+
+void parse_reset(FILE * in);
+
+parse_t * read(FILE * in);
+
+void rewind(plist_t * l);
+
+int p_int(del_t * del, FILE * in);
+
+int p_double(del_t * del, FILE * in);
+
+int p_var(del_t * del, FILE * in);
+
+int p_assign(del_t * del, FILE * in);
+
+int p_print(del_t * del, FILE * in);
+
+int p_println(del_t * del, FILE * in);
+
+int p_primary(del_t * del, FILE * in);
+
+int p_infix10(del_t * del, FILE * in);
+
+int p_expr(del_t * del, FILE * in);
+
+int p_while(del_t * del, FILE * in);
+
+int p_if_else(del_t * del, FILE * in);
+
+int p_fn(del_t * del, FILE * in);
+
+int p_return(del_t * del, FILE * in);
+
+int p_appl(del_t * del, FILE * in);
+
+int p_stmt(del_t * del, FILE * in);
+
+int parse(del_t * d, FILE * in);
 
 #ifndef PARSER_H
 #define PARSER_H

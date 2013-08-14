@@ -1,28 +1,15 @@
 #include "backend.h"
 
-/******************************************************************************
-
-   Objects
-
-******************************************************************************/
+gen_t * nil;
 
 function_t * current_fn;
 
-gen_t * nil;
+jmp_buf exc;
 
-void init(void)
+void exception(void)
 {
-   sym_tab_init();
-   parse_init();
-   scope_init();
-   types_init();
-   
-   nil = (gen_t *) GC_MALLOC(sizeof(gen_t));
-   nil->type = t_nil;
-
-   current_fn = NULL;
+   longjmp(exc, 1);
 }
-
 /******************************************************************************
 
    Call constructors
@@ -327,11 +314,16 @@ OP_UN(__dec, --)
 UNOP_DEL(_inc)
 UNOP_DEL(_dec)
 
-fn_t __ident(const char * id)
+fn_t __ident(sym_t * id)
 {
-   sym_t * sym = sym_lookup(id);
-   bind_t * bind = find_symbol(sym);
+   bind_t * bind = find_symbol(id);
    
+   if (bind == NULL)
+   {
+      printf("Symbol %s not found!\n", id->name);
+      exception();
+   }
+
    gen_t * g = bind->val;
    
    return [=] () {
@@ -339,7 +331,7 @@ fn_t __ident(const char * id)
    };
 }
 
-del_t _ident(const char * id)
+del_t _ident(sym_t * id)
 {
    return [=] () {
       return __ident(id);
@@ -369,17 +361,17 @@ del_t _assign(del_t a, del_t b)
    };
 }
 
-fn_t __var(const char * id, fn_t val)
+fn_t __var(sym_t * id, fn_t val)
 {
    gen_t * g = (gen_t *) GC_MALLOC(sizeof(gen_t));
-   bind_symbol(sym_lookup(id), g);
+   bind_symbol(id, g);
 
    fn_t var = __ident(id);
 
    return __assign(var, val);
 }
 
-del_t _var(const char * id, del_t v)
+del_t _var(sym_t * id, del_t v)
 {
    return [=] () {
       fn_t f = v();
@@ -478,19 +470,14 @@ del_t _if_else(del_t cond, del_t stmt1, del_t stmt2)
    };
 }
 
-void __new_function(const char * id, const char ** params, int num_params)
+void __new_function(sym_t * sym, sym_t ** p, int num_params)
 {
-   sym_t * sym = sym_lookup(id);
-   sym_t ** p = (sym_t **) GC_MALLOC(num_params*sizeof(sym_t *));
    gen_t * g = (gen_t *) GC_MALLOC(sizeof(gen_t));
    env_t * save = current_scope;
    function_t * f = (function_t *) GC_MALLOC(sizeof(function_t)); 
    int i;
 
    current_fn = f;
-
-   for (i = 0; i < num_params; i++)
-      p[i] = sym_lookup(params[i]);
 
    f->params = p;
    
@@ -506,7 +493,7 @@ void __new_function(const char * id, const char ** params, int num_params)
    for (i = 0; i < num_params; i++)
    {
       g = (gen_t *) GC_MALLOC(sizeof(gen_t));
-      bind_symbol(sym_lookup(params[i]), g);
+      bind_symbol(p[i], g);
       f->vals[i] = g;
    }
 
@@ -543,7 +530,7 @@ fn_t __function_body(const fn_t * arr, int num)
    };
 }
 
-del_t _function(const char * id, const char ** params, int num_params, const del_t * arr, int num)
+del_t _function(sym_t * id, sym_t ** params, int num_params, const del_t * arr, int num)
 {
    del_t res = [=] () {
       fn_t * farr = (fn_t *) GC_MALLOC(num*sizeof(fn_t));
@@ -566,9 +553,9 @@ del_t _function(const char * id, const char ** params, int num_params, const del
    return res;
 }
 
-fn_t __call(const char * id, const fn_t * params, int num)
+fn_t __call(sym_t * id, const fn_t * params, int num)
 {
-   bind_t * bind = find_symbol(sym_lookup(id));
+   bind_t * bind = find_symbol(id);
    gen_t * g = bind->val;
    function_t * f = (function_t *) g->val.ptr;
    gen_t ** vals = f->vals;
@@ -598,7 +585,7 @@ fn_t __call(const char * id, const fn_t * params, int num)
    };
 }
 
-del_t _call_fn(const char * id, const del_t * params, int num)
+del_t _call_fn(sym_t * id, const del_t * params, int num)
 {
    return [=] () {
       fn_t * farr = (fn_t *) GC_MALLOC(num*sizeof(fn_t));

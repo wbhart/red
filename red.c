@@ -1,4 +1,4 @@
-#include "backend.h"
+#include "parser.h"
 
 int main(void)
 {
@@ -7,7 +7,7 @@ int main(void)
    GC_INIT();
    init();
 
-   _var("i", _int(0))()();
+   /*_var("i", _int(0))()();
    _var("s", _int(0))()();
    
    del_t arr[] = { _inc(_ident("i")), _addeq(_ident("s"), _ident("i")) };
@@ -36,7 +36,27 @@ int main(void)
 
    del_t vals2[] = { _int(20) };
 
-   _println(_call("fac", vals2))()();
+   _println(_call("fac", vals2))()();*/
+
+   int jval = 0;
+   del_t root;
+   
+   while (1)
+   {
+      printf("> ");
+
+      if (!(jval = setjmp(exc)))
+      {
+         if (parse(&root, stdin))
+            root()();
+         else
+         {
+            printf("Syntax error!\n");
+            parse_reset(stdin);
+         }
+      } else
+         parse_reset(stdin);
+   }
 
    return 0;
 }
