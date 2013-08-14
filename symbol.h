@@ -1,6 +1,6 @@
 /*
 
-Copyright 2012 William Hart. All rights reserved.
+Copyright 2013 William Hart. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
