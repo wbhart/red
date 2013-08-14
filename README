@@ -1,0 +1,84 @@
+The Red Interpreter v0.1
+========================
+
+Red is a toy dynamic language with interactive console, with a very simple virtual machine which uses C++11 lambdas instead of a state machine or Jit.
+
+The whole implementation is designed to be simple, rather than fast, etc.
+
+Each input statement is parsed using a recursive descent parser. No AST is constructed as such. Rather the parser constructs the runtime elements directly, though delayed evaluation (via an additional layer of lambdas) is used to overcome limitations with the order of evaluation in C/C++.
+
+Each runtime element consists of a C++11 lambda closure. Once parsing is complete, a single function call executes the statement. Because large switch tables are not required at runtime, and some processing can be accomplished at parse time, the resulting runtime performance is not terrible (though certainly not comparable with a statically typed, compiled or even jit'd, dynamic language).
+
+Building Red
+============
+
+Red has only one external dependency, other than g++ and make, namely the Boehm-Demers-Weiser garbage collection library, found at:
+
+http://www.hpl.hp.com/personal/Hans_Boehm/gc/
+
+The stable version is fine, though the latest version (which is much more difficult to build) seems faster.
+
+Once GC has been built, edit Red's makefile so that the correct location of GC is specified (edit the LIB and INC lines).
+
+Now simply type:
+
+make
+./red
+
+The Syntax of Red
+=================
+
+Expressions:
+------------
+
+Integer literals: 12345, etc
+Double literals: 1.23e-21, etc
+
+Binary operators: +, -, *, /, %
+Reltional operators: <, >, <=, >=, ==, !=
+Combined assignment: ++, --, +=, -=, *=, /=, %=
+
+Parentheses: x - (a + b*c)
+
+Function calls: f(1, 2, 3)
+
+Statements:
+-----------
+
+As for C/C++ all statements must terminate in a semicolon or be contained in braces.
+
+Variable declarations:
+
+var v1 = 27;
+
+Assignment:
+
+v1 = 3;
+
+If..else statement:
+
+if (a == b) stmt1; else stmt2;
+
+While statement:
+
+while (a < 100) stmt;
+
+Function declarations:
+
+fn f1(a, b, c) {
+   stmt1;
+   stmt2;
+   return a + b;
+}
+
+Standard library:
+-----------------
+
+print(x);
+println(x);
+
+License and warranty
+====================
+
+Red is licensed under the 2-clause BSD license. There is no warranty.
+
